@@ -9,10 +9,10 @@ const User = require("../models/User")
 
 const client = require('twilio')(process.env.A_SID, process.env.AUTH_TOKEN)
 
-const getUser = async(req) => {
+const getUser = async(req,res) => {
   const { authorization } = req.headers;
   if (!authorization) {
-    return null
+    return res.status(422).send({ error: "Invalid Token" })
   }
   const token = authorization.replace("Bearer ", "");
   const { userId } = jwt.verify(token, jwtkey);
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
 
 router.route('/verifyPhoneNo')
       .get(async (req, res) => {
-        const user = await getUser(req)
+        const user = await getUser(req,res)
         if(user.isPhoneNoVerified){
           return res.status(422).send({ error: "Phone no is already verified" })
         }
@@ -89,7 +89,7 @@ router.route('/verifyPhoneNo')
       
       })
       .post(async (req, res) => {
-        const user = await getUser(req)
+        const user = await getUser(req,res)
         if(user.isPhoneNoVerified){
           return res.status(422).send({ error: "Phone no is already verified" })
         }
