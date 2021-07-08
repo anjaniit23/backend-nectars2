@@ -5,7 +5,6 @@ const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 const jwtkey = process.env.JWT_KEY
 const router = express.Router();
-const requireToken = require("../Middleware/requiretoken")
 const User = require("../models/User")
 
 const client = require('twilio')(process.env.A_SID, process.env.AUTH_TOKEN)

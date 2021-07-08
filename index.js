@@ -10,7 +10,7 @@ const MongoStore = require('connect-mongo');
 
 const User = require("./models/User")
 const authRoutes = require("./Routes/auth");
-const requireToken = require('./Middleware/requireToken')
+const requireToken = require("./Middleware/requiretoken")
 const isPhoneNoVerified = require("./Middleware/isPhoneNoVerified")
 
 const dbUrl = process.env.DB_URL;
