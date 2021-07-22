@@ -9,9 +9,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo');
 
 const User = require("./models/User")
-const authRoutes = require("./Routes/auth");
-const requireToken = require("./middlewareUtils/requiretoken")
-const isPhoneNoVerified = require("./middlewareUtils/isPhoneNoVerified")
+const {authRoutes,productsRoutes} = require("./Routes");
+const {requireToken,isPhoneNoVerified} = require("./middlewares")
 
 const dbUrl = process.env.DB_URL;
 mongoose.connect(dbUrl,
@@ -27,14 +26,15 @@ db.once('open', function () {
     console.log("MONGOOSE CONNECTED")
 });
 
-app.use(bodyParser.json())
+app.use(express.json())
 app.use(mongoSanitize({
    replaceWith: ' '
  }));
 
 app.use("/api/auth",authRoutes)
+app.use("/api/products",productsRoutes)
 
-app.get('/',requireToken,isPhoneNoVerified,async(req,res)=>{
+app.get('/',requireToken,isPhoneNoVerified(true),async(req,res)=>{
     res.send(req.user)
 })
 

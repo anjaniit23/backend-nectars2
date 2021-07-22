@@ -1,28 +1,13 @@
-require("dotenv").config()
-
 const express = require('express')
 const mongoose = require('mongoose')
+
 const jwt = require('jsonwebtoken')
 const jwtkey = process.env.JWT_KEY
 const router = express.Router();
 const User = require("../models/User")
+const {requireToken,isPhoneNoVerified} = require("../middlewares")
 
 const client = require('twilio')(process.env.A_SID, process.env.AUTH_TOKEN)
-
-const getUser = async(req,res) => {
-  const { authorization } = req.headers;
-  if (!authorization) {
-    return res.status(422).send({ error: "Invalid Token" })
-  }
-  const token = authorization.replace("Bearer ", "");
-  const { userId } = jwt.verify(token, jwtkey);
-  const user = await User.findById(userId)
-  if (!user) {
-    return res.status(422).send({ error: "Invalid Token" })
-  }
-  return user;
-}
-
 
 router.post('/register', async (req, res) => {
     const { email, password, name, role = "Customer", phoneNo } = req.body;
@@ -67,13 +52,9 @@ router.post('/login', async (req, res) => {
   })
 
 router.route('/verifyPhoneNo')
-      .get(async (req, res) => {
-        const user = await getUser(req,res)
-        if(user.isPhoneNoVerified){
-          return res.status(422).send({ error: "Phone no is already verified" })
-        }
-
-        client
+      .get(requireToken,isPhoneNoVerified(false),async (req, res) => {
+        const user = req.user
+         client
           .verify
           .services(process.env.SID)
           .verifications
@@ -88,8 +69,8 @@ router.route('/verifyPhoneNo')
           })
       
       })
-      .post(async (req, res) => {
-        const user = await getUser(req,res)
+      .post(requireToken,isPhoneNoVerified(false),async (req, res) => {
+        const user = req.user
         if(user.isPhoneNoVerified){
           return res.status(422).send({ error: "Phone no is already verified" })
         }
@@ -118,6 +99,8 @@ router.route('/verifyPhoneNo')
                 else {
                   res.send({ success: "OTP is incorrect" })
                 }
+              },reason =>{
+                res.status(501).send({ error: reason });
               })
           } catch (e) {
             res.status(504).send({ error: "Generate OTP again" })

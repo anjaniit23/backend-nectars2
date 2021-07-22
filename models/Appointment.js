@@ -22,10 +22,7 @@ const AppointmentSchema = new mongoose.Schema({
     },
     title: String,
     Description: String,
-    dateUpload:{
-        type: Date
-    }
-});
+},{timestamps: true});
 
 AppointmentSchema.virtual('getUploadTime').get(function() {
     const date = this.dateUpload
